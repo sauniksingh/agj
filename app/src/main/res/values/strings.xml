@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">agj</string>
+    <!--    <string name="agj">अथातो घुमक्कड़ जिज्ञासा</string>-->
+    <string name="agj">TO DO</string>
+    <string name="_00">00</string>
+    <string name="days">Days</string>
+    <string name="hour">Hour</string>
+    <string name="minute">Minute</string>
+    <string name="second">Second</string>
+    <string name="happy_journey">Happy Journey</string>
+    <string name="trip">Upcoming Trip</string>
+    <string name="default_notification_channel_id">Miscellaneous</string>
+</resources>

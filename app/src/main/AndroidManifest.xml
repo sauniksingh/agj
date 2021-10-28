@@ -14,17 +14,19 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
-        <!--        <activity-->
-        <!--            android:name=".widget.firebase.MainActivity"-->
-        <!--            android:screenOrientation="portrait"-->
-        <!--            tools:ignore="LockedOrientationActivity">-->
-        <!--            <intent-filter>-->
-        <!--                <action android:name="android.intent.action.MAIN" />-->
-
-        <!--                <category android:name="android.intent.category.LAUNCHER" />-->
-        <!--            </intent-filter>-->
-        <!--        </activity>-->
-        <receiver android:name=".widget.views.TripWidgetProvider">
+        <activity
+            android:name=".widget.views.TodoListActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <receiver
+            android:name=".widget.views.TripWidgetProvider"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -36,7 +38,8 @@
 
         <service
             android:name=".widget.firebase.MyFirebaseInstanceIdService"
-            android:exported="false">
+            android:exported="true"
+            tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>

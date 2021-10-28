@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
         android:id="@+id/top"
@@ -13,7 +14,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <TextView
                 android:id="@+id/tv_event"
@@ -34,7 +36,8 @@
             android:gravity="center"
             android:textColor="@android:color/white"
             android:textSize="20sp"
-            android:textStyle="normal" />
+            android:textStyle="normal"
+            tools:text="Namasya Vaccination" />
 
         <LinearLayout
             android:id="@+id/linear_layout_2"
@@ -42,7 +45,8 @@
             android:layout_height="wrap_content"
             android:baselineAligned="false"
             android:paddingBottom="5dp"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <LinearLayout
                 android:id="@+id/ll_days"
@@ -50,7 +54,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <TextView
                     android:id="@+id/tv_days"
@@ -59,7 +64,8 @@
                     android:layout_gravity="center"
                     android:textColor="@android:color/white"
                     android:textSize="20sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    tools:text="04" />
 
                 <TextView
                     android:id="@+id/tv_days_title"
@@ -78,7 +84,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <TextView
                     android:id="@+id/tv_hour"
@@ -87,7 +94,8 @@
                     android:layout_gravity="center"
                     android:textColor="@android:color/white"
                     android:textSize="20sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    tools:text="11" />
 
                 <TextView
                     android:id="@+id/tv_hour_title"
@@ -106,7 +114,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <TextView
                     android:id="@+id/tv_minute"
@@ -115,7 +124,8 @@
                     android:layout_gravity="center"
                     android:textColor="@android:color/white"
                     android:textSize="20sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    tools:text="28" />
 
                 <TextView
                     android:id="@+id/tv_minute_title"
@@ -134,7 +144,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <TextView
                     android:id="@+id/tv_second"
@@ -143,7 +154,8 @@
                     android:layout_gravity="center"
                     android:textColor="@android:color/white"
                     android:textSize="20sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    tools:text="28" />
 
                 <TextView
                     android:id="@+id/tv_second_title"
@@ -168,6 +180,7 @@
             android:textColor="@android:color/white"
             android:textSize="20sp"
             android:textStyle="normal"
-            android:visibility="gone" />
+            android:visibility="gone"
+            tools:visibility="visible" />
     </LinearLayout>
 </layout>

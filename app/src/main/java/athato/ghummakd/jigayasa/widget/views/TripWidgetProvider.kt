@@ -27,6 +27,7 @@ class TripWidgetProvider : AppWidgetProvider(), RTDUpdateListener {
     @Suppress("DEPRECATION")
     private val handler: Handler = Handler()
     private lateinit var runnable: Runnable
+    private val onClick = "Openapp"
 
     @SuppressLint("SimpleDateFormat")
     val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
@@ -55,6 +56,9 @@ class TripWidgetProvider : AppWidgetProvider(), RTDUpdateListener {
             context?.packageName,
             R.layout.trip
         )
+        remoteViews?.layoutId?.apply {
+            remoteViews?.setOnClickPendingIntent(this, getPendingSelfIntent())
+        }
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -215,6 +219,19 @@ class TripWidgetProvider : AppWidgetProvider(), RTDUpdateListener {
                 (1000 * 60 * 23).toLong(),
                 pi
             )
+        }
+    }
+
+    private fun getPendingSelfIntent(): PendingIntent? {
+        val intent = Intent(mContext, javaClass)
+        intent.action = onClick
+        return PendingIntent.getBroadcast(mContext, 0, intent, 0)
+    }
+
+    override fun onReceive(context: Context?, intent: Intent?) {
+        super.onReceive(context, intent)
+        if (onClick.equals(intent?.action, true)) {
+            mContext?.startActivity(Intent(mContext, TodoListActivity::class.java))
         }
     }
 }

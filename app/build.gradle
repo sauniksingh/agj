@@ -6,7 +6,6 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 android {
     compileSdkVersion 31
-    buildToolsVersion "30.0.2"
     signingConfigs {
         agj {
 //            storeFile file('../key/agj.jks')

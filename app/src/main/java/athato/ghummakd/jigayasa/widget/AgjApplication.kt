@@ -3,8 +3,7 @@ package athato.ghummakd.jigayasa.widget
 import android.app.Application
 import athato.ghummakd.jigayasa.R
 import athato.ghummakd.jigayasa.widget.model.TripPojo
-import com.google.firebase.FirebaseApp
-import com.google.firebase.database.*
+import com.google.firebase.database.ChildEventListener
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.IOException
@@ -16,41 +15,41 @@ import java.nio.charset.StandardCharsets
  * Bada Business
  */
 class AgjApplication : Application() {
-    private lateinit var mDatabaseReference: DatabaseReference
+    //    private lateinit var mDatabaseReference: DatabaseReference
     private lateinit var childEventListener: ChildEventListener
     var rtdUpdateListener: RTDUpdateListener? = null
     lateinit var activityRtdUpdateListener: RTDUpdateListener
     var todo = ArrayList<TripPojo>()
     override fun onCreate() {
         super.onCreate()
-        FirebaseApp.initializeApp(this)
+//        FirebaseApp.initializeApp(this)
         todo = getTodos()
-        mDatabaseReference =
-            FirebaseDatabase.getInstance("https://agj-testing.firebaseio.com/").reference
-        mDatabaseReference.keepSynced(true)
-        childEventListener = object : ChildEventListener {
-            override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
-                val tripPojo = dataSnapshot.getValue(TripPojo::class.java)
-                updateChild(tripPojo)
-            }
-
-            override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {
-                val tripPojo = dataSnapshot.getValue(TripPojo::class.java)
-                updateChild(tripPojo)
-            }
-
-            override fun onChildRemoved(dataSnapshot: DataSnapshot) {
-                val todoItem = dataSnapshot.getValue(TripPojo::class.java)
-                removeChild(todoItem)
-            }
-
-            override fun onChildMoved(dataSnapshot: DataSnapshot, s: String?) {
-                updateChild(dataSnapshot.getValue(TripPojo::class.java))
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {}
-        }
-        mDatabaseReference.addChildEventListener(childEventListener)
+//        mDatabaseReference =
+//            FirebaseDatabase.getInstance("https://agj-testing.firebaseio.com/").reference
+//        mDatabaseReference.keepSynced(true)
+//        childEventListener = object : ChildEventListener {
+//            override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
+//                val tripPojo = dataSnapshot.getValue(TripPojo::class.java)
+//                updateChild(tripPojo)
+//            }
+//
+//            override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {
+//                val tripPojo = dataSnapshot.getValue(TripPojo::class.java)
+//                updateChild(tripPojo)
+//            }
+//
+//            override fun onChildRemoved(dataSnapshot: DataSnapshot) {
+//                val todoItem = dataSnapshot.getValue(TripPojo::class.java)
+//                removeChild(todoItem)
+//            }
+//
+//            override fun onChildMoved(dataSnapshot: DataSnapshot, s: String?) {
+//                updateChild(dataSnapshot.getValue(TripPojo::class.java))
+//            }
+//
+//            override fun onCancelled(databaseError: DatabaseError) {}
+//        }
+//        mDatabaseReference.addChildEventListener(childEventListener)
     }
 
     private fun getTodos(): ArrayList<TripPojo> {

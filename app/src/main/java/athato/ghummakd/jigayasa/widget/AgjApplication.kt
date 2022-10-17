@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets
 class AgjApplication : Application() {
     //    private lateinit var mDatabaseReference: DatabaseReference
     private lateinit var childEventListener: ChildEventListener
-    var rtdUpdateListener: RTDUpdateListener? = null
+//    var rtdUpdateListener: RTDUpdateListener? = null
     lateinit var activityRtdUpdateListener: RTDUpdateListener
     var todo = ArrayList<TripPojo>()
     override fun onCreate() {
@@ -76,7 +76,7 @@ class AgjApplication : Application() {
                 break
             }
         }
-        rtdUpdateListener?.notifyDataChange()
+//        rtdUpdateListener?.notifyDataChange()
         activityRtdUpdateListener.notifyDataChange()
     }
 
@@ -88,7 +88,7 @@ class AgjApplication : Application() {
                 itr.remove()
             }
         }
-        rtdUpdateListener?.notifyDataChange()
+//        rtdUpdateListener?.notifyDataChange()
         activityRtdUpdateListener.notifyDataChange()
     }
 }

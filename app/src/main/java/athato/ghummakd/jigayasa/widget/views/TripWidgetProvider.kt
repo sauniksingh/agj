@@ -3,6 +3,7 @@ package athato.ghummakd.jigayasa.widget.views
 import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.app.Service
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.BroadcastReceiver
@@ -42,7 +43,7 @@ class TripWidgetProvider : AppWidgetProvider(), RTDUpdateListener {
     ) {
         super.onUpdate(context, appWidgetManager, appWidgetIds)
         mContext = context
-        (context?.applicationContext as AgjApplication).rtdUpdateListener = this
+//        (context?.applicationContext as AgjApplication).rtdUpdateListener = this
         mAppWidgetManager = appWidgetManager!!
         mAppWidgetIds = appWidgetIds!!
         initUI(context)
@@ -201,7 +202,7 @@ class TripWidgetProvider : AppWidgetProvider(), RTDUpdateListener {
 
     private fun cancelAlarm(context: Context) {
         val intent = Intent(context, Alarm::class.java)
-        val sender = PendingIntent.getBroadcast(context, resultCode, intent, 0)
+        val sender = PendingIntent.getBroadcast(context, resultCode, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.cancel(sender)
     }
@@ -212,7 +213,7 @@ class TripWidgetProvider : AppWidgetProvider(), RTDUpdateListener {
             val am = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val i = Intent(this, Alarm::class.java)
             i.putExtra("event", pojo)
-            val pi = PendingIntent.getBroadcast(this, request, i, 0)
+            val pi = PendingIntent.getBroadcast(this, request, i, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
             am.setRepeating(
                 AlarmManager.RTC_WAKEUP,
                 System.currentTimeMillis(),
@@ -225,7 +226,7 @@ class TripWidgetProvider : AppWidgetProvider(), RTDUpdateListener {
     private fun getPendingSelfIntent(): PendingIntent? {
         val intent = Intent(mContext, javaClass)
         intent.action = onClick
-        return PendingIntent.getBroadcast(mContext, 0, intent, 0)
+        return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
     override fun onReceive(context: Context?, intent: Intent?) {

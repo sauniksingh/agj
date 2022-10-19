@@ -10,6 +10,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
+import android.os.SystemClock
 import android.text.TextUtils
 import android.util.Log
 import android.view.View
@@ -173,6 +174,7 @@ class TripWidgetProvider : AppWidgetProvider(), RTDUpdateListener {
             }
             remoteViews?.setViewVisibility(R.id.linear_layout_2, View.VISIBLE)
             updateTitleMessage(tripPojo)
+            mAppWidgetManager?.notifyAppWidgetViewDataChanged(mAppWidgetIds, R.id.linear_layout_2)
         } else {
             remoteViews?.setViewVisibility(R.id.linear_layout_1, View.VISIBLE)
             remoteViews?.setViewVisibility(R.id.linear_layout_2, View.GONE)
@@ -202,7 +204,12 @@ class TripWidgetProvider : AppWidgetProvider(), RTDUpdateListener {
 
     private fun cancelAlarm(context: Context) {
         val intent = Intent(context, Alarm::class.java)
-        val sender = PendingIntent.getBroadcast(context, resultCode, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val sender = PendingIntent.getBroadcast(
+            context,
+            resultCode,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.cancel(sender)
     }
@@ -213,11 +220,16 @@ class TripWidgetProvider : AppWidgetProvider(), RTDUpdateListener {
             val am = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val i = Intent(this, Alarm::class.java)
             i.putExtra("event", pojo)
-            val pi = PendingIntent.getBroadcast(this, request, i, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+            val pi = PendingIntent.getBroadcast(
+                this,
+                request,
+                i,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
             am.setRepeating(
-                AlarmManager.RTC_WAKEUP,
-                System.currentTimeMillis(),
-                (1000 * 60 * 23).toLong(),
+                AlarmManager.ELAPSED_REALTIME,
+                SystemClock.elapsedRealtime(),
+                (1000 * 60).toLong(),
                 pi
             )
         }
@@ -226,7 +238,12 @@ class TripWidgetProvider : AppWidgetProvider(), RTDUpdateListener {
     private fun getPendingSelfIntent(): PendingIntent? {
         val intent = Intent(mContext, javaClass)
         intent.action = onClick
-        return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        return PendingIntent.getBroadcast(
+            mContext,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
     }
 
     override fun onReceive(context: Context?, intent: Intent?) {

@@ -86,10 +86,10 @@ class TripWidgetProvider : AppWidgetProvider() {
             views.setViewVisibility(R.id.linear_layout_2, View.GONE)
         } else {
             views.setViewVisibility(R.id.linear_layout_2, View.VISIBLE)
-            setUnit(views, R.id.ll_days, R.id.tv_days, countdown.days)
-            setUnit(views, R.id.ll_hour, R.id.tv_hour, countdown.hours)
-            setUnit(views, R.id.ll_min, R.id.tv_minute, countdown.minutes)
-            setUnit(views, R.id.ll_sec, R.id.tv_second, countdown.seconds)
+            setUnit(views, R.id.ll_days, R.id.tv_days, countdown.totalDays)
+            setUnit(views, R.id.ll_hour, R.id.tv_hour, countdown.hoursOfDay)
+            setUnit(views, R.id.ll_min, R.id.tv_minute, countdown.minutesOfHour)
+            setUnit(views, R.id.ll_sec, R.id.tv_second, countdown.secondsOfMinute)
         }
         return views
     }

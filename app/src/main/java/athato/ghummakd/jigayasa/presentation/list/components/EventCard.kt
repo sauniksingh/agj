@@ -63,11 +63,7 @@ fun EventCard(
         ),
         label = "pulse_alpha"
     )
-    val cardColors = if (isNextUpcoming) {
-        CardDefaults.cardColors(containerColor = Color.Transparent)
-    } else {
-        CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    }
+    val cardColors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     Card(
         modifier = modifier
             .fillMaxWidth()

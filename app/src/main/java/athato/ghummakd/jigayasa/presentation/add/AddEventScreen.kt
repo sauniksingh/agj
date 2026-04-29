@@ -270,8 +270,8 @@ private fun FutureTimePickerDialog(
                 get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR)
         }
     }
-    val defaultHour = initialHour ?: if (isToday) (now.get(Calendar.HOUR_OF_DAY) + 1) % 24 else 9
-    val defaultMinute = initialMinute ?: 0
+    val defaultHour = initialHour ?: now.get(Calendar.HOUR_OF_DAY)
+    val defaultMinute = initialMinute ?: now.get(Calendar.MINUTE)
     val timeState = rememberTimePickerState(
         initialHour = defaultHour,
         initialMinute = defaultMinute,

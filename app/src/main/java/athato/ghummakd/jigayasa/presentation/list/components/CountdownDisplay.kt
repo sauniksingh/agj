@@ -2,7 +2,6 @@ package athato.ghummakd.jigayasa.presentation.list.components
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -11,12 +10,9 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -51,10 +47,9 @@ fun CountdownDisplay(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        if (countdown.days > 0) UnitChip(value = countdown.days, label = "d", accent = accent)
-        UnitChip(value = countdown.hours, label = "h", accent = accent)
-        UnitChip(value = countdown.minutes, label = "m", accent = accent)
-        if (countdown.days == 0L) UnitChip(value = countdown.seconds, label = "s", accent = accent)
+        countdown.displaySegments.forEach { segment ->
+            UnitChip(value = segment.value, label = segment.label, accent = accent)
+        }
     }
 }
 
@@ -82,7 +77,7 @@ private fun UnitChip(value: Long, label: String, accent: Color) {
                 label = "countdown_value"
             ) { v ->
                 Text(
-                    text = "%02d".format(v),
+                    text = if (v >= 100) v.toString() else "%02d".format(v),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = accent

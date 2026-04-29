@@ -14,6 +14,7 @@ import athato.ghummakd.jigayasa.domain.usecase.ObserveEventsUseCase
 import athato.ghummakd.jigayasa.domain.usecase.UpdateEventUseCase
 import athato.ghummakd.jigayasa.presentation.add.AddEventViewModel
 import athato.ghummakd.jigayasa.presentation.list.EventListViewModel
+import athato.ghummakd.jigayasa.presentation.view.ViewEventViewModel
 import athato.ghummakd.jigayasa.widget.TripWidgetUpdater
 
 object ServiceLocator {
@@ -61,6 +62,17 @@ object ServiceLocator {
                     updateEvent = updateEventUseCase(context),
                     getEvent = getEventUseCase(context),
                     editingId = editingId
+                ) as T
+        }
+
+    fun viewViewModelFactory(context: Context, eventId: Int): ViewModelProvider.Factory =
+        object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                ViewEventViewModel(
+                    observeEvents = observeEventsUseCase(context),
+                    deleteEvent = deleteEventUseCase(context),
+                    eventId = eventId
                 ) as T
         }
 }

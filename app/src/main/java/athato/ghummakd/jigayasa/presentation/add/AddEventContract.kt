@@ -9,6 +9,8 @@ data class AddEventState(
     val editingId: Int? = null,
     val title: String = "",
     val message: String = "",
+    val amountInput: String = "",
+    val currencyCode: String = "INR",
     val pickedDateMillis: Long? = null,
     val pickedHour: Int? = null,
     val pickedMinute: Int? = null,
@@ -51,6 +53,8 @@ data class AddEventState(
 sealed interface AddEventIntent : UiIntent {
     data class TitleChanged(val value: String) : AddEventIntent
     data class MessageChanged(val value: String) : AddEventIntent
+    data class AmountChanged(val digits: String) : AddEventIntent
+    data class CurrencyPicked(val code: String) : AddEventIntent
     data class DatePicked(val millis: Long) : AddEventIntent
     data class TimePicked(val hour: Int, val minute: Int) : AddEventIntent
     data class CategoryPicked(val category: Category) : AddEventIntent

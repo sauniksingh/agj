@@ -12,13 +12,16 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import athato.ghummakd.jigayasa.presentation.add.AddEventScreen
 import athato.ghummakd.jigayasa.presentation.list.EventListScreen
+import athato.ghummakd.jigayasa.presentation.view.ViewEventScreen
 
 object Routes {
     const val LIST = "list"
     const val ADD = "event/add"
     const val EDIT_PATTERN = "event/edit/{id}"
+    const val VIEW_PATTERN = "event/view/{id}"
     fun edit(id: Int) = "event/edit/$id"
-    const val EDIT_ARG_ID = "id"
+    fun view(id: Int) = "event/view/$id"
+    const val ARG_ID = "id"
 }
 
 @Composable
@@ -45,7 +48,8 @@ fun AgjNavGraph() {
         composable(Routes.LIST) {
             EventListScreen(
                 onNavigateToAdd = { navController.navigate(Routes.ADD) },
-                onNavigateToEdit = { id -> navController.navigate(Routes.edit(id)) }
+                onNavigateToEdit = { id -> navController.navigate(Routes.edit(id)) },
+                onNavigateToView = { id -> navController.navigate(Routes.view(id)) }
             )
         }
         composable(Routes.ADD) {
@@ -53,12 +57,25 @@ fun AgjNavGraph() {
         }
         composable(
             route = Routes.EDIT_PATTERN,
-            arguments = listOf(navArgument(Routes.EDIT_ARG_ID) { type = NavType.IntType })
+            arguments = listOf(navArgument(Routes.ARG_ID) { type = NavType.IntType })
         ) { entry ->
-            val id = entry.arguments?.getInt(Routes.EDIT_ARG_ID)
+            val id = entry.arguments?.getInt(Routes.ARG_ID)
             AddEventScreen(
                 onClose = { navController.popBackStack() },
                 editingId = id
+            )
+        }
+        composable(
+            route = Routes.VIEW_PATTERN,
+            arguments = listOf(navArgument(Routes.ARG_ID) { type = NavType.IntType })
+        ) { entry ->
+            val id = entry.arguments?.getInt(Routes.ARG_ID) ?: return@composable
+            ViewEventScreen(
+                eventId = id,
+                onClose = { navController.popBackStack() },
+                onEdit = { editId ->
+                    navController.navigate(Routes.edit(editId))
+                }
             )
         }
     }

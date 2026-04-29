@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import athato.ghummakd.jigayasa.R
 import athato.ghummakd.jigayasa.domain.model.Category
 import athato.ghummakd.jigayasa.domain.model.Event
+import athato.ghummakd.jigayasa.presentation.util.AmountFormatter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -79,12 +80,17 @@ class EventLocalDataSource(private val context: Context) {
             val ts = dto.timeStamp ?: return@mapIndexedNotNull null
             val parsed = runCatching { format.parse(ts)?.time }.getOrNull() ?: return@mapIndexedNotNull null
             val title = dto.title.orEmpty()
+            val rawMsg = dto.greetingMsg.orEmpty()
+            val parsedAmount = AmountFormatter.parseAmountFromText(rawMsg)
+            val noteOnly = if (parsedAmount != null) AmountFormatter.stripAmountFromText(rawMsg) else rawMsg
             Event(
                 id = index,
                 title = title,
-                message = dto.greetingMsg.orEmpty(),
+                message = noteOnly,
                 timestamp = parsed,
-                category = Category.fromTitle(title).name
+                category = Category.fromTitle(title).name,
+                amount = parsedAmount?.takeIf { it > 0 },
+                currencyCode = if (parsedAmount != null && parsedAmount > 0) "INR" else null
             )
         }
     }.getOrElse { emptyList() }

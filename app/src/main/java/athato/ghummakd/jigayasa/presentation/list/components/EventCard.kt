@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,11 +38,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import athato.ghummakd.jigayasa.domain.model.Category
 import athato.ghummakd.jigayasa.domain.model.Event
+import athato.ghummakd.jigayasa.domain.model.SupportedCurrencies
 import athato.ghummakd.jigayasa.presentation.category.CategoryBadge
 import athato.ghummakd.jigayasa.presentation.category.visual
 import athato.ghummakd.jigayasa.presentation.theme.GradientEnd
 import athato.ghummakd.jigayasa.presentation.theme.GradientMid
 import athato.ghummakd.jigayasa.presentation.theme.GradientStart
+import athato.ghummakd.jigayasa.presentation.util.AmountFormatter
 import athato.ghummakd.jigayasa.presentation.util.EventTimeFormatter
 
 @Composable
@@ -49,7 +52,8 @@ fun EventCard(
     event: Event,
     countdown: EventTimeFormatter.Countdown,
     isNextUpcoming: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     val category = remember(event.id, event.category, event.title) {
         Category.resolve(event.category, event.title)
@@ -70,6 +74,7 @@ fun EventCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
+            .let { if (onClick != null) it.clickable(onClick = onClick) else it }
             .border(
                 width = if (isNextUpcoming) 1.5.dp else 0.dp,
                 brush = Brush.linearGradient(listOf(GradientStart, GradientMid, GradientEnd)),
@@ -129,11 +134,19 @@ fun EventCard(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
-                    if (event.message.isNotBlank()) {
+                    val amountLine = remember(event.amount, event.currencyCode) {
+                        event.amount?.takeIf { it > 0 }?.let { amt ->
+                            val symbol = SupportedCurrencies.find(event.currencyCode).symbol
+                            "$symbol${AmountFormatter.groupIndian(amt)}"
+                        }
+                    }
+                    val secondary = amountLine ?: event.message.takeIf { it.isNotBlank() }
+                    if (secondary != null) {
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            text = event.message,
+                            text = secondary,
                             style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = if (amountLine != null) FontWeight.SemiBold else FontWeight.Normal,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis

@@ -54,7 +54,8 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun EventListScreen(
     onNavigateToAdd: () -> Unit,
-    onNavigateToEdit: (Int) -> Unit
+    onNavigateToEdit: (Int) -> Unit,
+    onNavigateToView: (Int) -> Unit
 ) {
     val context = LocalContext.current
     val viewModel: EventListViewModel = viewModel(factory = ServiceLocator.listViewModelFactory(context))
@@ -111,7 +112,8 @@ fun EventListScreen(
                     state = state,
                     now = now,
                     onDelete = { viewModel.send(EventListIntent.Delete(it.id)) },
-                    onEdit = { viewModel.send(EventListIntent.Edit(it.id)) }
+                    onEdit = { viewModel.send(EventListIntent.Edit(it.id)) },
+                    onCardClick = { onNavigateToView(it.id) }
                 )
             }
         }
@@ -148,7 +150,8 @@ private fun EventList(
     state: EventListState,
     now: Long,
     onDelete: (athato.ghummakd.jigayasa.domain.model.Event) -> Unit,
-    onEdit: (athato.ghummakd.jigayasa.domain.model.Event) -> Unit
+    onEdit: (athato.ghummakd.jigayasa.domain.model.Event) -> Unit,
+    onCardClick: (athato.ghummakd.jigayasa.domain.model.Event) -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp),
@@ -169,7 +172,8 @@ private fun EventList(
                         event = item,
                         countdown = EventTimeFormatter.countdown(item, now),
                         isNextUpcoming = item.id == state.nextUpcomingId,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { onCardClick(item) }
                     )
                 }
             }

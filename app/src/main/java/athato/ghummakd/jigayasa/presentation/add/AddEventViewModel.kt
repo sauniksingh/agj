@@ -38,6 +38,8 @@ class AddEventViewModel(
                         copy(
                             title = event.title,
                             message = event.message,
+                            amountInput = event.amount?.takeIf { it > 0 }?.toString().orEmpty(),
+                            currencyCode = event.currencyCode ?: "INR",
                             pickedDateMillis = utcMidnight,
                             pickedHour = local.get(Calendar.HOUR_OF_DAY),
                             pickedMinute = local.get(Calendar.MINUTE),
@@ -57,6 +59,10 @@ class AddEventViewModel(
                 copy(title = intent.value, category = newCategory, error = null)
             }
             is AddEventIntent.MessageChanged -> setState { copy(message = intent.value) }
+            is AddEventIntent.AmountChanged -> setState {
+                copy(amountInput = intent.digits.filter { it.isDigit() }.take(15), error = null)
+            }
+            is AddEventIntent.CurrencyPicked -> setState { copy(currencyCode = intent.code) }
             is AddEventIntent.DatePicked -> setState { copy(pickedDateMillis = intent.millis, error = null) }
             is AddEventIntent.TimePicked -> setState {
                 copy(pickedHour = intent.hour, pickedMinute = intent.minute, error = null)
@@ -85,11 +91,13 @@ class AddEventViewModel(
             return
         }
         setState { copy(isSubmitting = true, error = null) }
+        val parsedAmount = current.amountInput.takeIf { it.isNotBlank() }?.toLongOrNull()?.takeIf { it > 0 }
+        val currencyForSave = if (parsedAmount != null) current.currencyCode else null
         runCatching {
             if (current.editingId == null) {
-                addEvent(current.title, current.message, ts, current.category)
+                addEvent(current.title, current.message, ts, current.category, parsedAmount, currencyForSave)
             } else {
-                updateEvent(current.editingId, current.title, current.message, ts, current.category)
+                updateEvent(current.editingId, current.title, current.message, ts, current.category, parsedAmount, currencyForSave)
             }
         }.onSuccess {
             setState { copy(isSubmitting = false) }

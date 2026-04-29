@@ -33,6 +33,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -40,6 +42,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.SnackbarHost
@@ -62,16 +65,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import athato.ghummakd.jigayasa.di.ServiceLocator
 import athato.ghummakd.jigayasa.domain.model.Category
+import athato.ghummakd.jigayasa.domain.model.SupportedCurrencies
 import athato.ghummakd.jigayasa.presentation.category.CategoryMiniIcon
 import athato.ghummakd.jigayasa.presentation.category.visual
 import athato.ghummakd.jigayasa.presentation.theme.GradientEnd
 import athato.ghummakd.jigayasa.presentation.theme.GradientMid
 import athato.ghummakd.jigayasa.presentation.theme.GradientStart
+import athato.ghummakd.jigayasa.presentation.util.IndianAmountVisualTransformation
+import androidx.compose.foundation.text.KeyboardOptions
 import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -141,6 +148,12 @@ fun AddEventScreen(onClose: () -> Unit, editingId: Int? = null) {
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp)
+            )
+            AmountRow(
+                amountInput = state.amountInput,
+                currencyCode = state.currencyCode,
+                onAmountChange = { viewModel.send(AddEventIntent.AmountChanged(it)) },
+                onCurrencyChange = { viewModel.send(AddEventIntent.CurrencyPicked(it)) }
             )
             OutlinedTextField(
                 value = state.message,
@@ -231,6 +244,81 @@ fun AddEventScreen(onClose: () -> Unit, editingId: Int? = null) {
                 viewModel.send(AddEventIntent.TimePicked(hour, minute))
                 showTimePicker = false
             }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AmountRow(
+    amountInput: String,
+    currencyCode: String,
+    onAmountChange: (String) -> Unit,
+    onCurrencyChange: (String) -> Unit
+) {
+    val current = SupportedCurrencies.find(currencyCode)
+    var menuOpen by remember { mutableStateOf(false) }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box {
+            Card(
+                modifier = Modifier
+                    .height(56.dp)
+                    .clickable { menuOpen = true },
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp).fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = current.symbol,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(Modifier.size(4.dp))
+                    Text(
+                        text = current.code,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+            }
+            DropdownMenu(
+                expanded = menuOpen,
+                onDismissRequest = { menuOpen = false }
+            ) {
+                SupportedCurrencies.ALL.forEach { c ->
+                    DropdownMenuItem(
+                        text = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(c.symbol, style = MaterialTheme.typography.titleMedium)
+                                Spacer(Modifier.size(8.dp))
+                                Text("${c.code} · ${c.displayName}")
+                            }
+                        },
+                        onClick = {
+                            onCurrencyChange(c.code)
+                            menuOpen = false
+                        }
+                    )
+                }
+            }
+        }
+        OutlinedTextField(
+            value = amountInput,
+            onValueChange = onAmountChange,
+            label = { Text("Amount (optional)") },
+            singleLine = true,
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(14.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            visualTransformation = remember { IndianAmountVisualTransformation() },
+            colors = OutlinedTextFieldDefaults.colors()
         )
     }
 }

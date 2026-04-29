@@ -9,7 +9,9 @@ class AddEventUseCase(private val repository: EventRepository) {
         title: String,
         message: String,
         timestamp: Long,
-        category: Category = Category.GENERAL
+        category: Category = Category.GENERAL,
+        amount: Long? = null,
+        currencyCode: String? = null
     ): Event {
         require(title.isNotBlank()) { "Title cannot be blank" }
         require(timestamp > System.currentTimeMillis()) { "Pick a future date and time" }
@@ -19,7 +21,9 @@ class AddEventUseCase(private val repository: EventRepository) {
             title = title.trim(),
             message = message.trim(),
             timestamp = timestamp,
-            category = category.name
+            category = category.name,
+            amount = amount?.takeIf { it > 0 },
+            currencyCode = if (amount != null && amount > 0) currencyCode else null
         )
         repository.add(event)
         return event

@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +18,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -31,6 +34,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -61,14 +66,20 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import athato.ghummakd.jigayasa.di.ServiceLocator
+import athato.ghummakd.jigayasa.domain.model.Category
+import athato.ghummakd.jigayasa.presentation.category.CategoryMiniIcon
+import athato.ghummakd.jigayasa.presentation.category.visual
 import athato.ghummakd.jigayasa.presentation.theme.GradientEnd
 import athato.ghummakd.jigayasa.presentation.theme.GradientMid
 import athato.ghummakd.jigayasa.presentation.theme.GradientStart
-import athato.ghummakd.jigayasa.presentation.util.EventTimeFormatter
 import kotlinx.coroutines.flow.collectLatest
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -138,10 +149,14 @@ fun AddEventScreen(onClose: () -> Unit, editingId: Int? = null) {
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp)
             )
+            CategorySelector(
+                selected = state.category,
+                onPick = { viewModel.send(AddEventIntent.CategoryPicked(it)) }
+            )
             PickerRow(
                 icon = Icons.Filled.DateRange,
                 label = "Date",
-                value = state.pickedDateMillis?.let { EventTimeFormatter.formatLong(it).substringBefore(" · ") } ?: "Pick a date",
+                value = state.pickedDateMillis?.let { formatPickedDate(it) } ?: "Pick a date",
                 onClick = { showDatePicker = true }
             )
             PickerRow(
@@ -197,7 +212,7 @@ fun AddEventScreen(onClose: () -> Unit, editingId: Int? = null) {
 
     if (showDatePicker) {
         FutureDatePickerDialog(
-            initialMillis = state.pickedDateMillis ?: System.currentTimeMillis(),
+            initialMillis = state.pickedDateMillis ?: defaultUtcMidnightForToday(),
             onDismiss = { showDatePicker = false },
             onConfirm = { millis ->
                 viewModel.send(AddEventIntent.DatePicked(millis))
@@ -217,6 +232,50 @@ fun AddEventScreen(onClose: () -> Unit, editingId: Int? = null) {
                 showTimePicker = false
             }
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CategorySelector(
+    selected: Category,
+    onPick: (Category) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = "Category",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        )
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(end = 8.dp)
+        ) {
+            items(items = Category.entries.toTypedArray(), key = { it.name }) { cat ->
+                val isSelected = cat == selected
+                FilterChip(
+                    selected = isSelected,
+                    onClick = { onPick(cat) },
+                    label = { Text(cat.displayName) },
+                    leadingIcon = {
+                        CategoryMiniIcon(
+                            category = cat,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = cat.visual().accent.copy(alpha = 0.18f),
+                        selectedLabelColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        enabled = true,
+                        selected = isSelected,
+                        selectedBorderColor = cat.visual().accent,
+                        selectedBorderWidth = 1.5.dp
+                    )
+                )
+            }
+        }
     }
 }
 
@@ -264,10 +323,9 @@ private fun FutureTimePickerDialog(
 ) {
     val now = remember { Calendar.getInstance() }
     val isToday = remember(pickedDateMillis) {
-        if (pickedDateMillis == null) false else Calendar.getInstance().run {
-            timeInMillis = pickedDateMillis
-            get(Calendar.YEAR) == now.get(Calendar.YEAR) &&
-                get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR)
+        if (pickedDateMillis == null) false else {
+            val pickedDate = Instant_atZone_UTC_LocalDate(pickedDateMillis)
+            pickedDate == LocalDate.now()
         }
     }
     val defaultHour = initialHour ?: now.get(Calendar.HOUR_OF_DAY)
@@ -303,9 +361,8 @@ private fun FutureTimePickerDialog(
                 ) {
                     TextButton(onClick = onDismiss) { Text("Cancel") }
                     TextButton(onClick = {
-                        if (isToday && pickedDateMillis != null) {
+                        if (isToday) {
                             val candidate = Calendar.getInstance().apply {
-                                timeInMillis = pickedDateMillis
                                 set(Calendar.HOUR_OF_DAY, timeState.hour)
                                 set(Calendar.MINUTE, timeState.minute)
                                 set(Calendar.SECOND, 0)
@@ -388,3 +445,16 @@ private fun PickerRow(
         }
     }
 }
+
+private fun formatPickedDate(utcMidnightMillis: Long): String {
+    // Format the UTC-midnight value in the UTC zone so the displayed date matches what the picker shows.
+    val fmt = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+    fmt.timeZone = TimeZone.getTimeZone("UTC")
+    return fmt.format(Date(utcMidnightMillis))
+}
+
+private fun defaultUtcMidnightForToday(): Long =
+    LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
+
+private fun Instant_atZone_UTC_LocalDate(utcMidnightMillis: Long): LocalDate =
+    java.time.Instant.ofEpochMilli(utcMidnightMillis).atZone(ZoneId.of("UTC")).toLocalDate()

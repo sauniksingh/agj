@@ -1,12 +1,13 @@
 package athato.ghummakd.jigayasa.widget.views
 
+import android.app.AlarmManager
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.Handler
-import android.os.Looper
+import android.os.SystemClock
 import android.view.View
 import android.widget.RemoteViews
 import athato.ghummakd.jigayasa.R
@@ -14,14 +15,16 @@ import athato.ghummakd.jigayasa.di.ServiceLocator
 import athato.ghummakd.jigayasa.domain.model.Event
 import athato.ghummakd.jigayasa.presentation.MainActivity
 import athato.ghummakd.jigayasa.presentation.util.EventTimeFormatter
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
+/**
+ * Home-screen widget that shows the next upcoming event with a live countdown.
+ *
+ * Lifecycle of an AppWidgetProvider is short — instances are recreated for each broadcast.
+ * Per-second/per-minute updates therefore must be driven by the system, so we schedule
+ * inexact 60-second alarms with [AlarmManager] that bounce a custom action back to this
+ * provider's [onReceive].
+ */
 class TripWidgetProvider : AppWidgetProvider() {
-
-    private val handler = Handler(Looper.getMainLooper())
-    private var ticker: Runnable? = null
 
     override fun onUpdate(
         context: Context,
@@ -29,41 +32,55 @@ class TripWidgetProvider : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         super.onUpdate(context, appWidgetManager, appWidgetIds)
-        scheduleTick(context, appWidgetManager, appWidgetIds)
+        renderAll(context, appWidgetManager, appWidgetIds)
+        scheduleTick(context)
+    }
+
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        scheduleTick(context)
     }
 
     override fun onDisabled(context: Context) {
         super.onDisabled(context)
-        ticker?.let { handler.removeCallbacks(it) }
-        ticker = null
+        cancelTick(context)
     }
 
-    private fun scheduleTick(
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        when (intent.action) {
+            ACTION_TICK, ACTION_REFRESH -> {
+                val mgr = AppWidgetManager.getInstance(context)
+                val ids = mgr.getAppWidgetIds(ComponentName(context, TripWidgetProvider::class.java))
+                if (ids.isNotEmpty()) {
+                    renderAll(context, mgr, ids)
+                    if (intent.action == ACTION_TICK) scheduleTick(context)
+                }
+            }
+        }
+    }
+
+    private fun renderAll(
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        ticker?.let { handler.removeCallbacks(it) }
-        val appContext = context.applicationContext
-        ticker = object : Runnable {
-            override fun run() {
-                CoroutineScope(Dispatchers.Main).launch {
-                    val next = withIO { ServiceLocator.nextUpcomingUseCase(appContext)() }
-                    val views = buildRemoteViews(appContext, next)
-                    appWidgetManager.updateAppWidget(appWidgetIds, views)
-                }
-                handler.postDelayed(this, 1000L)
-            }
-        }
-        handler.post(ticker!!)
+        val app = context.applicationContext
+        val next = ServiceLocator.nextUpcomingUseCase(app)()
+        val views = buildRemoteViews(app, next)
+        appWidgetManager.updateAppWidget(appWidgetIds, views)
     }
-
-    private suspend fun <T> withIO(block: suspend () -> T): T =
-        kotlinx.coroutines.withContext(Dispatchers.IO) { block() }
 
     private fun buildRemoteViews(context: Context, event: Event?): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.trip)
-        views.setOnClickPendingIntent(R.id.top, openAppPendingIntent(context))
+        val openApp = openAppPendingIntent(context)
+        // Make the entire widget tappable.
+        views.setOnClickPendingIntent(R.id.top, openApp)
+        views.setOnClickPendingIntent(R.id.title, openApp)
+        views.setOnClickPendingIntent(R.id.hjTextView, openApp)
+        views.setOnClickPendingIntent(R.id.linear_layout_1, openApp)
+        views.setOnClickPendingIntent(R.id.linear_layout_2, openApp)
+
         if (event == null) {
             views.setViewVisibility(R.id.linear_layout_1, View.VISIBLE)
             views.setViewVisibility(R.id.linear_layout_2, View.GONE)
@@ -103,15 +120,45 @@ class TripWidgetProvider : AppWidgetProvider() {
         }
     }
 
+    private fun scheduleTick(context: Context) {
+        val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val pi = tickPendingIntent(context)
+        am.cancel(pi)
+        val triggerAt = SystemClock.elapsedRealtime() + TICK_INTERVAL_MS
+        am.set(AlarmManager.ELAPSED_REALTIME, triggerAt, pi)
+    }
+
+    private fun cancelTick(context: Context) {
+        val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        am.cancel(tickPendingIntent(context))
+    }
+
+    private fun tickPendingIntent(context: Context): PendingIntent {
+        val intent = Intent(context, TripWidgetProvider::class.java).apply {
+            action = ACTION_TICK
+            component = ComponentName(context, TripWidgetProvider::class.java)
+        }
+        return PendingIntent.getBroadcast(
+            context, REQUEST_TICK, intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+    }
+
     private fun openAppPendingIntent(context: Context): PendingIntent {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         return PendingIntent.getActivity(
-            context,
-            0,
-            intent,
+            context, REQUEST_OPEN, intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
+    }
+
+    companion object {
+        const val ACTION_TICK = "athato.ghummakd.jigayasa.widget.action.TICK"
+        const val ACTION_REFRESH = "athato.ghummakd.jigayasa.widget.action.REFRESH"
+        private const val TICK_INTERVAL_MS = 60_000L
+        private const val REQUEST_TICK = 0xA1
+        private const val REQUEST_OPEN = 0xA2
     }
 }

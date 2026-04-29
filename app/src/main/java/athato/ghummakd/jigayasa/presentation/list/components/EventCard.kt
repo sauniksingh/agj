@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -32,13 +31,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import athato.ghummakd.jigayasa.domain.model.Category
 import athato.ghummakd.jigayasa.domain.model.Event
+import athato.ghummakd.jigayasa.presentation.category.CategoryBadge
+import athato.ghummakd.jigayasa.presentation.category.visual
 import athato.ghummakd.jigayasa.presentation.theme.GradientEnd
 import athato.ghummakd.jigayasa.presentation.theme.GradientMid
 import athato.ghummakd.jigayasa.presentation.theme.GradientStart
@@ -51,8 +51,11 @@ fun EventCard(
     isNextUpcoming: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val accent = remember(event.id, isNextUpcoming) {
-        if (isNextUpcoming) GradientStart else accentForId(event.id)
+    val category = remember(event.id, event.category, event.title) {
+        Category.resolve(event.category, event.title)
+    }
+    val accent = remember(category, isNextUpcoming) {
+        if (isNextUpcoming) GradientStart else category.visual().accent
     }
     val pulse by rememberInfiniteTransition(label = "pulse").animateFloat(
         initialValue = 0.92f,
@@ -93,7 +96,7 @@ fun EventCard(
                 modifier = Modifier.padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconBadge(accent = accent, isNext = isNextUpcoming)
+                CategoryBadge(category = category, size = 46.dp)
                 Spacer(Modifier.size(14.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     AnimatedVisibility(visible = isNextUpcoming, enter = fadeIn(), exit = fadeOut()) {
@@ -142,38 +145,4 @@ fun EventCard(
             }
         }
     }
-}
-
-@Composable
-private fun IconBadge(accent: Color, isNext: Boolean) {
-    Box(
-        modifier = Modifier
-            .size(46.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(
-                if (isNext)
-                    Brush.linearGradient(listOf(GradientStart, GradientMid, GradientEnd))
-                else
-                    Brush.linearGradient(listOf(accent.copy(alpha = 0.18f), accent.copy(alpha = 0.10f)))
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = Icons.Filled.Event,
-            contentDescription = null,
-            tint = if (isNext) Color.White else accent
-        )
-    }
-}
-
-private fun accentForId(id: Int): Color {
-    val palette = listOf(
-        Color(0xFF3F51B5),
-        Color(0xFF00897B),
-        Color(0xFFD81B60),
-        Color(0xFF8E24AA),
-        Color(0xFFFB8C00),
-        Color(0xFF1E88E5)
-    )
-    return palette[(id % palette.size + palette.size) % palette.size]
 }

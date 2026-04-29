@@ -27,5 +27,5 @@ class EventRepositoryImpl(
         onChange()
     }
 
-    override suspend fun snapshot(): List<Event> = local.snapshot()
+    override fun snapshot(): List<Event> = local.snapshot()
 }

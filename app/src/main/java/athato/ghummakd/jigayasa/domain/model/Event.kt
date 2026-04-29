@@ -4,5 +4,6 @@ data class Event(
     val id: Int,
     val title: String,
     val message: String,
-    val timestamp: Long
+    val timestamp: Long,
+    val category: String? = null
 )

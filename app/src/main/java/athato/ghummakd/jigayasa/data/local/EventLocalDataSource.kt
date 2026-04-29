@@ -3,6 +3,7 @@ package athato.ghummakd.jigayasa.data.local
 import android.content.Context
 import android.content.SharedPreferences
 import athato.ghummakd.jigayasa.R
+import athato.ghummakd.jigayasa.domain.model.Category
 import athato.ghummakd.jigayasa.domain.model.Event
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -77,11 +78,13 @@ class EventLocalDataSource(private val context: Context) {
         seeds.mapIndexedNotNull { index, dto ->
             val ts = dto.timeStamp ?: return@mapIndexedNotNull null
             val parsed = runCatching { format.parse(ts)?.time }.getOrNull() ?: return@mapIndexedNotNull null
+            val title = dto.title.orEmpty()
             Event(
                 id = index,
-                title = dto.title.orEmpty(),
+                title = title,
                 message = dto.greetingMsg.orEmpty(),
-                timestamp = parsed
+                timestamp = parsed,
+                category = Category.fromTitle(title).name
             )
         }
     }.getOrElse { emptyList() }

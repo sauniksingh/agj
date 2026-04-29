@@ -1,12 +1,14 @@
 package athato.ghummakd.jigayasa.presentation.add
 
 import androidx.lifecycle.viewModelScope
+import athato.ghummakd.jigayasa.domain.model.Category
 import athato.ghummakd.jigayasa.domain.usecase.AddEventUseCase
 import athato.ghummakd.jigayasa.domain.usecase.GetEventUseCase
 import athato.ghummakd.jigayasa.domain.usecase.UpdateEventUseCase
 import athato.ghummakd.jigayasa.presentation.mvi.MviViewModel
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import java.util.TimeZone
 
 class AddEventViewModel(
     private val addEvent: AddEventUseCase,
@@ -19,21 +21,28 @@ class AddEventViewModel(
         if (editingId != null) {
             viewModelScope.launch {
                 getEvent(editingId)?.let { event ->
-                    val cal = Calendar.getInstance().apply { timeInMillis = event.timestamp }
-                    val dayOnly = Calendar.getInstance().apply {
-                        timeInMillis = event.timestamp
-                        set(Calendar.HOUR_OF_DAY, 0)
-                        set(Calendar.MINUTE, 0)
-                        set(Calendar.SECOND, 0)
+                    val local = Calendar.getInstance().apply { timeInMillis = event.timestamp }
+                    val utcMidnight = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+                        clear()
+                        set(
+                            local.get(Calendar.YEAR),
+                            local.get(Calendar.MONTH),
+                            local.get(Calendar.DAY_OF_MONTH),
+                            0,
+                            0,
+                            0
+                        )
                         set(Calendar.MILLISECOND, 0)
-                    }
+                    }.timeInMillis
                     setState {
                         copy(
                             title = event.title,
                             message = event.message,
-                            pickedDateMillis = dayOnly.timeInMillis,
-                            pickedHour = cal.get(Calendar.HOUR_OF_DAY),
-                            pickedMinute = cal.get(Calendar.MINUTE)
+                            pickedDateMillis = utcMidnight,
+                            pickedHour = local.get(Calendar.HOUR_OF_DAY),
+                            pickedMinute = local.get(Calendar.MINUTE),
+                            category = Category.resolve(event.category, event.title),
+                            categoryManuallyPicked = true
                         )
                     }
                 }
@@ -43,11 +52,17 @@ class AddEventViewModel(
 
     override suspend fun handle(intent: AddEventIntent) {
         when (intent) {
-            is AddEventIntent.TitleChanged -> setState { copy(title = intent.value, error = null) }
+            is AddEventIntent.TitleChanged -> setState {
+                val newCategory = if (categoryManuallyPicked) category else Category.fromTitle(intent.value)
+                copy(title = intent.value, category = newCategory, error = null)
+            }
             is AddEventIntent.MessageChanged -> setState { copy(message = intent.value) }
             is AddEventIntent.DatePicked -> setState { copy(pickedDateMillis = intent.millis, error = null) }
             is AddEventIntent.TimePicked -> setState {
                 copy(pickedHour = intent.hour, pickedMinute = intent.minute, error = null)
+            }
+            is AddEventIntent.CategoryPicked -> setState {
+                copy(category = intent.category, categoryManuallyPicked = true)
             }
             AddEventIntent.DismissError -> setState { copy(error = null) }
             AddEventIntent.Submit -> submit()
@@ -72,9 +87,9 @@ class AddEventViewModel(
         setState { copy(isSubmitting = true, error = null) }
         runCatching {
             if (current.editingId == null) {
-                addEvent(current.title, current.message, ts)
+                addEvent(current.title, current.message, ts, current.category)
             } else {
-                updateEvent(current.editingId, current.title, current.message, ts)
+                updateEvent(current.editingId, current.title, current.message, ts, current.category)
             }
         }.onSuccess {
             setState { copy(isSubmitting = false) }

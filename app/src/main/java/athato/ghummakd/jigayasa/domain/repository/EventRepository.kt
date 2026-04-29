@@ -5,8 +5,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface EventRepository {
     fun observeEvents(): Flow<List<Event>>
+    fun snapshot(): List<Event>
     suspend fun add(event: Event)
     suspend fun update(event: Event)
     suspend fun delete(id: Int)
-    suspend fun snapshot(): List<Event>
 }

@@ -13,7 +13,9 @@ import android.widget.RemoteViews
 import athato.ghummakd.jigayasa.R
 import athato.ghummakd.jigayasa.di.ServiceLocator
 import athato.ghummakd.jigayasa.domain.model.Event
+import athato.ghummakd.jigayasa.domain.model.SupportedCurrencies
 import athato.ghummakd.jigayasa.presentation.MainActivity
+import athato.ghummakd.jigayasa.presentation.util.AmountFormatter
 import athato.ghummakd.jigayasa.presentation.util.EventTimeFormatter
 
 /**
@@ -92,9 +94,14 @@ class TripWidgetProvider : AppWidgetProvider() {
         views.setViewVisibility(R.id.linear_layout_1, View.GONE)
         views.setViewVisibility(R.id.title, View.VISIBLE)
         views.setTextViewText(R.id.title, event.title)
-        if (event.message.isNotBlank()) {
+        val amountLine = event.amount?.takeIf { it > 0 }?.let { amt ->
+            val symbol = SupportedCurrencies.find(event.currencyCode).symbol
+            "$symbol${AmountFormatter.groupIndian(amt)}"
+        }
+        val secondary = amountLine ?: event.message.takeIf { it.isNotBlank() }
+        if (secondary != null) {
             views.setViewVisibility(R.id.hjTextView, View.VISIBLE)
-            views.setTextViewText(R.id.hjTextView, event.message)
+            views.setTextViewText(R.id.hjTextView, secondary)
         } else {
             views.setViewVisibility(R.id.hjTextView, View.GONE)
         }

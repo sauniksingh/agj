@@ -18,9 +18,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -137,7 +140,8 @@ fun AddEventScreen(onClose: () -> Unit, editingId: Int? = null) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 20.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Banner(isEditing = state.isEditing)
@@ -259,12 +263,14 @@ private fun AmountRow(
     val current = SupportedCurrencies.find(currencyCode)
     var menuOpen by remember { mutableStateOf(false) }
     Row(
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Box {
+        Box(modifier = Modifier.width(96.dp)) {
             Card(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .height(56.dp)
                     .clickable { menuOpen = true },
                 shape = RoundedCornerShape(14.dp),
@@ -272,8 +278,9 @@ private fun AmountRow(
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 14.dp).fillMaxSize(),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
                         text = current.symbol,

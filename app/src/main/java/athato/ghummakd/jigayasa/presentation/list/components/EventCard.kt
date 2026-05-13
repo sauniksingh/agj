@@ -135,7 +135,7 @@ fun EventCard(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                     val amountLine = remember(event.amount, event.currencyCode) {
-                        event.amount?.takeIf { it > 0 }?.let { amt ->
+                        event.amount?.takeIf { it > 0.0 }?.let { amt ->
                             val symbol = SupportedCurrencies.find(event.currencyCode).symbol
                             "$symbol${AmountFormatter.groupIndian(amt)}"
                         }

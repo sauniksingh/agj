@@ -68,12 +68,12 @@ class TripWidgetProvider : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         val app = context.applicationContext
-        val next = ServiceLocator.nextUpcomingUseCase(app)()
-        val views = buildRemoteViews(app, next)
+        val nextGroup = ServiceLocator.nextUpcomingUseCase(app)()
+        val views = buildRemoteViews(app, nextGroup)
         appWidgetManager.updateAppWidget(appWidgetIds, views)
     }
 
-    private fun buildRemoteViews(context: Context, event: Event?): RemoteViews {
+    private fun buildRemoteViews(context: Context, events: List<Event>): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.trip)
         val openApp = openAppPendingIntent(context)
         // Make the entire widget tappable.
@@ -83,7 +83,7 @@ class TripWidgetProvider : AppWidgetProvider() {
         views.setOnClickPendingIntent(R.id.linear_layout_1, openApp)
         views.setOnClickPendingIntent(R.id.linear_layout_2, openApp)
 
-        if (event == null) {
+        if (events.isEmpty()) {
             views.setViewVisibility(R.id.linear_layout_1, View.VISIBLE)
             views.setViewVisibility(R.id.linear_layout_2, View.GONE)
             views.setViewVisibility(R.id.title, View.GONE)
@@ -93,19 +93,28 @@ class TripWidgetProvider : AppWidgetProvider() {
         }
         views.setViewVisibility(R.id.linear_layout_1, View.GONE)
         views.setViewVisibility(R.id.title, View.VISIBLE)
-        views.setTextViewText(R.id.title, event.title)
-        val amountLine = event.amount?.takeIf { it > 0 }?.let { amt ->
-            val symbol = SupportedCurrencies.find(event.currencyCode).symbol
-            "$symbol${AmountFormatter.groupIndian(amt)}"
+        val mergedTitle = events.joinToString(" / ") { it.title.ifBlank { "Untitled" } }
+        views.setTextViewText(R.id.title, mergedTitle)
+        val amountParts = events.mapNotNull { ev ->
+            ev.amount?.takeIf { it > 0.0 }?.let { amt ->
+                val symbol = SupportedCurrencies.find(ev.currencyCode).symbol
+                "$symbol${AmountFormatter.groupIndian(amt)}"
+            }
         }
-        val secondary = amountLine ?: event.message.takeIf { it.isNotBlank() }
+        val secondary = when {
+            amountParts.isNotEmpty() -> amountParts.joinToString(" / ")
+            events.size == 1 -> events[0].message.takeIf { it.isNotBlank() }
+            else -> events.mapNotNull { it.message.takeIf { m -> m.isNotBlank() } }
+                .takeIf { it.isNotEmpty() }
+                ?.joinToString(" / ")
+        }
         if (secondary != null) {
             views.setViewVisibility(R.id.hjTextView, View.VISIBLE)
             views.setTextViewText(R.id.hjTextView, secondary)
         } else {
             views.setViewVisibility(R.id.hjTextView, View.GONE)
         }
-        val countdown = EventTimeFormatter.countdown(event)
+        val countdown = EventTimeFormatter.countdown(events.first())
         if (countdown.isPast) {
             views.setViewVisibility(R.id.linear_layout_2, View.GONE)
         } else {

@@ -237,7 +237,7 @@ private fun Details(
             tint = visual.accent
         )
 
-        event.amount?.takeIf { it > 0 }?.let { amt ->
+        event.amount?.takeIf { it > 0.0 }?.let { amt ->
             val symbol = SupportedCurrencies.find(event.currencyCode).symbol
             val codeLabel = SupportedCurrencies.find(event.currencyCode).code
             DetailRow(

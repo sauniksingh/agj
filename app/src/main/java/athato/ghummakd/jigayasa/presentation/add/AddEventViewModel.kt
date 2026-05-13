@@ -38,7 +38,7 @@ class AddEventViewModel(
                         copy(
                             title = event.title,
                             message = event.message,
-                            amountInput = event.amount?.takeIf { it > 0 }?.toString().orEmpty(),
+                            amountInput = event.amount?.takeIf { it > 0.0 }?.let { formatAmountForInput(it) }.orEmpty(),
                             currencyCode = event.currencyCode ?: "INR",
                             pickedDateMillis = utcMidnight,
                             pickedHour = local.get(Calendar.HOUR_OF_DAY),
@@ -60,7 +60,7 @@ class AddEventViewModel(
             }
             is AddEventIntent.MessageChanged -> setState { copy(message = intent.value) }
             is AddEventIntent.AmountChanged -> setState {
-                copy(amountInput = intent.digits.filter { it.isDigit() }.take(15), error = null)
+                copy(amountInput = sanitizeAmountInput(intent.digits), error = null)
             }
             is AddEventIntent.CurrencyPicked -> setState { copy(currencyCode = intent.code) }
             is AddEventIntent.DatePicked -> setState { copy(pickedDateMillis = intent.millis, error = null) }
@@ -91,7 +91,11 @@ class AddEventViewModel(
             return
         }
         setState { copy(isSubmitting = true, error = null) }
-        val parsedAmount = current.amountInput.takeIf { it.isNotBlank() }?.toLongOrNull()?.takeIf { it > 0 }
+        val parsedAmount = current.amountInput
+            .takeIf { it.isNotBlank() }
+            ?.trimEnd('.')
+            ?.toDoubleOrNull()
+            ?.takeIf { it > 0.0 }
         val currencyForSave = if (parsedAmount != null) current.currencyCode else null
         runCatching {
             if (current.editingId == null) {
@@ -104,6 +108,45 @@ class AddEventViewModel(
             emitEffect(AddEventEffect.Saved)
         }.onFailure { e ->
             setState { copy(isSubmitting = false, error = e.message ?: "Failed to save") }
+        }
+    }
+
+    private fun sanitizeAmountInput(input: String): String {
+        val sb = StringBuilder()
+        var hasDot = false
+        var fracDigits = 0
+        var intDigits = 0
+        for (c in input) {
+            when {
+                c.isDigit() -> {
+                    if (hasDot) {
+                        if (fracDigits >= 2) continue
+                        sb.append(c)
+                        fracDigits++
+                    } else {
+                        if (intDigits >= 15) continue
+                        sb.append(c)
+                        intDigits++
+                    }
+                }
+                c == '.' && !hasDot -> {
+                    hasDot = true
+                    sb.append('.')
+                }
+            }
+        }
+        return sb.toString()
+    }
+
+    private fun formatAmountForInput(amount: Double): String {
+        val cents = kotlin.math.round(amount * 100.0).toLong()
+        val abs = if (cents < 0) -cents else cents
+        val intPart = abs / 100
+        val frac = abs % 100
+        return when {
+            frac == 0L -> intPart.toString()
+            frac % 10 == 0L -> "$intPart.${frac / 10}"
+            else -> "$intPart.%02d".format(frac)
         }
     }
 }

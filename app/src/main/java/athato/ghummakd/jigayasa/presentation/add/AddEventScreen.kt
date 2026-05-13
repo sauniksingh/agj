@@ -323,7 +323,7 @@ private fun AmountRow(
             singleLine = true,
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(14.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             visualTransformation = remember { IndianAmountVisualTransformation() },
             colors = OutlinedTextFieldDefaults.colors()
         )

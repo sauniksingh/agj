@@ -6,6 +6,6 @@ data class Event(
     val message: String,
     val timestamp: Long,
     val category: String? = null,
-    val amount: Long? = null,
+    val amount: Double? = null,
     val currencyCode: String? = null
 )

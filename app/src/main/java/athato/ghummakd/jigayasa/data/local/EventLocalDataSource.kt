@@ -89,8 +89,8 @@ class EventLocalDataSource(private val context: Context) {
                 message = noteOnly,
                 timestamp = parsed,
                 category = Category.fromTitle(title).name,
-                amount = parsedAmount?.takeIf { it > 0 },
-                currencyCode = if (parsedAmount != null && parsedAmount > 0) "INR" else null
+                amount = parsedAmount?.takeIf { it > 0.0 },
+                currencyCode = if (parsedAmount != null && parsedAmount > 0.0) "INR" else null
             )
         }
     }.getOrElse { emptyList() }

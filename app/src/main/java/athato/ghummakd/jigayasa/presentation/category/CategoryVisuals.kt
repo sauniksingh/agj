@@ -2,7 +2,6 @@ package athato.ghummakd.jigayasa.presentation.category
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -10,8 +9,9 @@ import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.BikeScooter
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CardTravel
-import androidx.compose.material.icons.filled.Chair
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.filled.DirectionsCar
@@ -19,16 +19,18 @@ import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material.icons.filled.HealthAndSafety
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Train
 import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.material.icons.filled.Vaccines
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -56,127 +58,137 @@ data class CategoryVisual(
 
 fun Category.visual(): CategoryVisual = when (this) {
     Category.AIR_TRAVEL -> CategoryVisual(
-        accent = Color(0xFF1976D2),
+        accent = randomReadableColor(),
         badge = CategoryBadgeStyle.IconStyle(Icons.Filled.Flight),
         miniIcon = Icons.Filled.Flight
     )
     Category.TRAIN_TRAVEL -> CategoryVisual(
-        accent = Color(0xFF388E3C),
+        accent = randomReadableColor(),
         badge = CategoryBadgeStyle.IconStyle(Icons.Filled.Train),
         miniIcon = Icons.Filled.Train
     )
     Category.BUS_TRAVEL -> CategoryVisual(
-        accent = Color(0xFFEF6C00),
+        accent = randomReadableColor(),
         badge = CategoryBadgeStyle.IconStyle(Icons.Filled.DirectionsBus),
         miniIcon = Icons.Filled.DirectionsBus
     )
     Category.TRAVEL -> CategoryVisual(
-        accent = Color(0xFF00897B),
+        accent = randomReadableColor(),
         badge = CategoryBadgeStyle.IconStyle(Icons.Filled.CardTravel),
         miniIcon = Icons.Filled.CardTravel
     )
     Category.AIRTEL -> CategoryVisual(
-        accent = Color(0xFFE40000),
-        badge = CategoryBadgeStyle.LetterStyle("AIR"),
+        accent = randomReadableColor(),
+        badge = CategoryBadgeStyle.IconStyle(Icons.Filled.SignalCellularAlt),
         miniIcon = Icons.Filled.Smartphone
     )
     Category.RENTOMOJO -> CategoryVisual(
-        accent = Color(0xFF6D4C41),
-        badge = CategoryBadgeStyle.LetterStyle("RM"),
-        miniIcon = Icons.Filled.Chair
+        accent = randomReadableColor(),
+        badge = CategoryBadgeStyle.IconStyle(Icons.Filled.Home),
+        miniIcon = Icons.Filled.Home
     )
     Category.MAINTENANCE -> CategoryVisual(
-        accent = Color(0xFF455A64),
+        accent = randomReadableColor(),
         badge = CategoryBadgeStyle.IconStyle(Icons.Filled.Apartment),
         miniIcon = Icons.Filled.Apartment
     )
     Category.HDFC -> CategoryVisual(
-        accent = Color(0xFF004C8F),
-        badge = CategoryBadgeStyle.LetterStyle("HDFC"),
+        accent = randomReadableColor(),
+        badge = CategoryBadgeStyle.IconStyle(Icons.Filled.CreditCard),
         miniIcon = Icons.Filled.AccountBalance
     )
     Category.IDFC -> CategoryVisual(
-        accent = Color(0xFF7A1F2A),
-        badge = CategoryBadgeStyle.LetterStyle("IDFC"),
+        accent = randomReadableColor(),
+        badge = CategoryBadgeStyle.IconStyle(Icons.Filled.CreditCard),
         miniIcon = Icons.Filled.AccountBalance
     )
     Category.ICICI -> CategoryVisual(
-        accent = Color(0xFFF37920),
-        badge = CategoryBadgeStyle.LetterStyle("ICI"),
+        accent = randomReadableColor(),
+        badge = CategoryBadgeStyle.IconStyle(Icons.Filled.CreditCard),
         miniIcon = Icons.Filled.AccountBalance
     )
     Category.AXIS -> CategoryVisual(
-        accent = Color(0xFF97144D),
-        badge = CategoryBadgeStyle.LetterStyle("AXIS"),
+        accent = randomReadableColor(),
+        badge = CategoryBadgeStyle.IconStyle(Icons.Filled.CreditCard),
         miniIcon = Icons.Filled.AccountBalance
     )
     Category.PNB -> CategoryVisual(
-        accent = Color(0xFFB6862C),
-        badge = CategoryBadgeStyle.LetterStyle("PNB"),
+        accent = randomReadableColor(),
+        badge = CategoryBadgeStyle.IconStyle(Icons.Filled.AccountBalance),
         miniIcon = Icons.Filled.AccountBalance
     )
     Category.EKADASHI -> CategoryVisual(
-        accent = Color(0xFFFF8F00),
+        accent = randomReadableColor(),
         badge = CategoryBadgeStyle.IconStyle(Icons.Filled.SelfImprovement),
         miniIcon = Icons.Filled.SelfImprovement
     )
     Category.IGL -> CategoryVisual(
-        accent = Color(0xFFE65100),
+        accent = randomReadableColor(),
         badge = CategoryBadgeStyle.IconStyle(Icons.Filled.LocalFireDepartment),
         miniIcon = Icons.Filled.LocalFireDepartment
     )
+    Category.ELECTRICITY -> CategoryVisual(
+        accent = randomReadableColor(),
+        badge = CategoryBadgeStyle.IconStyle(Icons.Filled.Bolt),
+        miniIcon = Icons.Filled.Bolt
+    )
+    Category.WATER -> CategoryVisual(
+        accent = randomReadableColor(),
+        badge = CategoryBadgeStyle.IconStyle(Icons.Filled.WaterDrop),
+        miniIcon = Icons.Filled.WaterDrop
+    )
     Category.VACCINATION -> CategoryVisual(
-        accent = Color(0xFF00897B),
+        accent = randomReadableColor(),
         badge = CategoryBadgeStyle.IconStyle(Icons.Filled.Vaccines),
         miniIcon = Icons.Filled.Vaccines
     )
     Category.PASSPORT -> CategoryVisual(
-        accent = Color(0xFF1565C0),
+        accent = randomReadableColor(),
         badge = CategoryBadgeStyle.IconStyle(Icons.Filled.Public),
         miniIcon = Icons.Filled.Public
     )
     Category.AADHAR -> CategoryVisual(
-        accent = Color(0xFF6A1B9A),
+        accent = randomReadableColor(),
         badge = CategoryBadgeStyle.IconStyle(Icons.Filled.Fingerprint),
         miniIcon = Icons.Filled.Fingerprint
     )
     Category.ACCESS_SUZUKI -> CategoryVisual(
-        accent = Color(0xFF1A237E),
+        accent = randomReadableColor(),
         badge = CategoryBadgeStyle.IconStyle(Icons.Filled.TwoWheeler),
-        miniIcon = Icons.Filled.TwoWheeler
+        miniIcon = Icons.Filled.BikeScooter
     )
     Category.INSURANCE -> CategoryVisual(
-        accent = Color(0xFF2E7D32),
+        accent = randomReadableColor(),
         badge = CategoryBadgeStyle.IconStyle(Icons.Filled.HealthAndSafety),
         miniIcon = Icons.Filled.HealthAndSafety
     )
     Category.LIC -> CategoryVisual(
-        accent = Color(0xFFC8102E),
-        badge = CategoryBadgeStyle.LetterStyle("LIC"),
+        accent = randomReadableColor(),
+        badge = CategoryBadgeStyle.IconStyle(Icons.Filled.HealthAndSafety),
         miniIcon = Icons.Filled.Shield
     )
     Category.BAJAJ -> CategoryVisual(
-        accent = Color(0xFF002F6C),
-        badge = CategoryBadgeStyle.LetterStyle("BAJ"),
+        accent = randomReadableColor(),
+        badge = CategoryBadgeStyle.IconStyle(Icons.Filled.HealthAndSafety),
         miniIcon = Icons.Filled.AccountBalanceWallet
     )
     Category.CAR -> CategoryVisual(
-        accent = Color(0xFF424242),
+        accent = randomReadableColor(),
         badge = CategoryBadgeStyle.IconStyle(Icons.Filled.DirectionsCar),
         miniIcon = Icons.Filled.DirectionsCar
     )
     Category.SCOOTER -> CategoryVisual(
-        accent = Color(0xFF455A64),
+        accent = randomReadableColor(),
         badge = CategoryBadgeStyle.IconStyle(Icons.Filled.TwoWheeler),
         miniIcon = Icons.Filled.TwoWheeler
     )
     Category.DRIVING_LICENSE -> CategoryVisual(
-        accent = Color(0xFF6D4C41),
-        badge = CategoryBadgeStyle.IconStyle(Icons.Filled.CreditCard),
+        accent = randomReadableColor(),
+        badge =CategoryBadgeStyle.LetterStyle("DL"),
         miniIcon = Icons.Filled.Badge
     )
     Category.GENERAL -> CategoryVisual(
-        accent = Color(0xFF1976D2),
+        accent = randomReadableColor(),
         badge = CategoryBadgeStyle.IconStyle(Icons.Filled.Event),
         miniIcon = Icons.Filled.Event
     )
@@ -252,4 +264,13 @@ private fun letterFontSizeFor(size: Dp, length: Int): androidx.compose.ui.unit.T
         else -> size.value * 0.22f
     }
     return baseSp.sp
+}
+
+private fun randomReadableColor(): Color {
+    return Color(
+        red = (150..255).random(),
+        green = (150..255).random(),
+        blue = (150..255).random(),
+        alpha = 255,
+    )
 }

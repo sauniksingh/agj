@@ -7,7 +7,7 @@ package athato.ghummakd.jigayasa.domain.model
 enum class Category(val displayName: String, val keywords: List<String>) {
     AIR_TRAVEL(
         "Air Travel",
-        listOf("flight", "airline", "airport", "del-", "ahm-", "blr-", "bom-", "ccu-", "hyd-", "maa-", "6e-", "ai-", "uk-", "g8-", "indigo", "vistara", "spicejet")
+        listOf("flight", "airline", "airport", "del-", "ahm-", "blr-", "bom-", "ccu-", "hyd-", "maa-", "6e-", "ai-", "uk-", "g8-", "indigo", "vistara", "spicejet","amd-", "6e", " amd ", " amd", "amd ", " del ", " del", "del ")
     ),
     BAJAJ("Bajaj Finance", listOf("bajaj")),
     LIC("LIC", listOf("lic")),
@@ -20,6 +20,8 @@ enum class Category(val displayName: String, val keywords: List<String>) {
     RENTOMOJO("Rentomojo", listOf("rentomojo")),
     EKADASHI("Fasting", listOf("ekadashi", "vrat", "fasting")),
     IGL("Gas / IGL", listOf("igl", "png gas", "gas pipeline")),
+    ELECTRICITY("Electricity", listOf("electricity", "ugvcl", "kesco", "uppcl")),
+    WATER("Water", listOf("water")),
     VACCINATION("Vaccination", listOf("vaccin")),
     PASSPORT("Passport", listOf("passport")),
     AADHAR("Aadhaar", listOf("aadhar", "aadhaar")),
